@@ -55,6 +55,21 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'discord.urls'
+CORS_ALLOW_CREDENTIALS = True
+CORS_URLS_REGEX=r"^/api/.*"
+CORS_ALLOWED_ORIGINS=[
+    # "http://localhost:8111/",
+    # "https://localhost:8111/",
+]
+
+
+if DEBUG:
+  CORS_ALLOWED_ORIGINS +=[
+    "http://localhost:8111", # not for production
+    "https://localhost:8111", # only allow ssl
+  ]
+
+
 
 TEMPLATES = [
     {
