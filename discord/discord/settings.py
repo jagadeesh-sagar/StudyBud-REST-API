@@ -65,7 +65,7 @@ CORS_ALLOWED_ORIGINS=[
 
 if DEBUG:
   CORS_ALLOWED_ORIGINS +=[
-    "http://localhost:8111", # not for production
+    "http://localhost:5173", # not for production
     "https://localhost:8111", # only allow ssl
   ]
 
