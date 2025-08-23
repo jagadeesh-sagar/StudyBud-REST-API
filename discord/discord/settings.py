@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 import os
 from pathlib import Path
+import datetime
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,18 +45,21 @@ INSTALLED_APPS = [
     "api",
     "room",
     'rest_framework', 
+    'rest_framework.authtoken', 
+    'rest_framework_simplejwt', 
     "corsheaders",
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+     "corsheaders.middleware.CorsMiddleware",
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-     "corsheaders.middleware.CorsMiddleware",
+
 ]
 
 ROOT_URLCONF = 'discord.urls'
@@ -70,7 +74,7 @@ CORS_ALLOWED_ORIGINS=[
 if DEBUG:
   CORS_ALLOWED_ORIGINS +=[
     "http://localhost:5173", # not for production
-    "https://localhost:8111", # only allow ssl
+    "http://localhost:8111", # only allow ssl
        "http://13.234.124.118:8000"
   ]
 
@@ -136,6 +140,16 @@ USE_I18N = True
 USE_TZ = True
 
 
+REST_FRAMEWORK={
+  'DEFAULT_AUTHENTICATION_CLASSES':[
+      'rest_framework.authentication.SessionAuthentication',
+          "rest_framework_simplejwt.authentication.JWTAuthentication",
+    
+
+  ]
+  
+}
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
@@ -145,3 +159,10 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+SIMPLE_JWT={
+  'AUTH_HEADER_TYPES':["Bearer"],
+  "ACCESS_TOKEN_LIFETIME":datetime.timedelta(minutes=15) ,
+  "REFRESH_TOKEN_LIFETIME":datetime.timedelta(minutes=45)
+}
