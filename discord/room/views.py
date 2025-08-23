@@ -3,6 +3,9 @@ from . import serializers
 from . import models
 from django.db.models import Q
 from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets
+from .permissions import IsOwnerOrReadOnly
+
 
 class RoomListAPIView(generics.ListCreateAPIView):
   queryset = models.Room.objects.all()
@@ -36,9 +39,11 @@ class RoomDetailAPIVIew(generics.RetrieveAPIView):
 room_detail_view=RoomDetailAPIVIew.as_view()
 
 
-class RoomUpdateAPIView(generics.UpdateAPIView):
+class RoomUpdateAPIView(generics.UpdateAPIView,viewsets.ModelViewSet):
   queryset=models.Room.objects.all()
   serializer_class=serializers.RoomSerializers
+  permission_classes=[IsOwnerOrReadOnly]
+
 
   def perform_update(self, serializer):
     serializer.save(user=self.request.user)
@@ -46,9 +51,10 @@ class RoomUpdateAPIView(generics.UpdateAPIView):
 room_update_view=RoomUpdateAPIView.as_view()
 
 
-class RoomDeleteAPIView(generics.DestroyAPIView):
+class RoomDeleteAPIView(generics.DestroyAPIView,viewsets.ModelViewSet):
   queryset=models.Room.objects.all()
   serializer_class=serializers.RoomSerializers
+  permission_classes=[IsOwnerOrReadOnly]
 
 room_delete_view=RoomDeleteAPIView.as_view()
 
