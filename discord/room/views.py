@@ -39,7 +39,7 @@ class RoomDetailAPIVIew(generics.RetrieveAPIView):
 room_detail_view=RoomDetailAPIVIew.as_view()
 
 
-class RoomUpdateAPIView(generics.UpdateAPIView,viewsets.ModelViewSet):
+class RoomUpdateAPIView(generics.UpdateAPIView):
   queryset=models.Room.objects.all()
   serializer_class=serializers.RoomSerializers
   permission_classes=[IsOwnerOrReadOnly]
@@ -51,7 +51,7 @@ class RoomUpdateAPIView(generics.UpdateAPIView,viewsets.ModelViewSet):
 room_update_view=RoomUpdateAPIView.as_view()
 
 
-class RoomDeleteAPIView(generics.DestroyAPIView,viewsets.ModelViewSet):
+class RoomDeleteAPIView(generics.DestroyAPIView):
   queryset=models.Room.objects.all()
   serializer_class=serializers.RoomSerializers
   permission_classes=[IsOwnerOrReadOnly]
