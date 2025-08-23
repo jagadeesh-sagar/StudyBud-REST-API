@@ -64,7 +64,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'discord.urls'
 CORS_ALLOW_CREDENTIALS = True
-CORS_URLS_REGEX=r"^/api/.*"
+CORS_URLS_REGEX=r"^/(api|room)/.*" 
 CORS_ALLOWED_ORIGINS=[
     # "http://localhost:8111/",
     # "https://localhost:8111/",
@@ -75,7 +75,7 @@ if DEBUG:
   CORS_ALLOWED_ORIGINS +=[
     "http://localhost:5173", # not for production
     "http://localhost:8111", # only allow ssl
-       "http://13.234.124.118:8000"
+          "http://127.0.0.1:5173", 
   ]
 
 
