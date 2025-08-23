@@ -2,6 +2,7 @@ from rest_framework import generics
 from . import serializers
 from . import models
 from django.db.models import Q
+from rest_framework.permissions import IsAuthenticated
 
 class RoomListAPIView(generics.ListCreateAPIView):
   queryset = models.Room.objects.all()
@@ -25,11 +26,8 @@ class RoomListAPIView(generics.ListCreateAPIView):
       
     return qs_name
   
-   
-
- 
-    
 room_list_create_view=RoomListAPIView.as_view()
+
 
 class RoomDetailAPIVIew(generics.RetrieveAPIView):
   queryset=models.Room.objects.all()
