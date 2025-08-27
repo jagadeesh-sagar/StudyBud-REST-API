@@ -4,3 +4,4 @@ django-cors-headers
 pyyaml
 requests
 djangorestframework-simplejwt
+boto3
