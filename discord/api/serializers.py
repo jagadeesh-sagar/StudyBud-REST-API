@@ -1,7 +1,14 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
+from .models import ProfileModel,ProfileAvatar
 
+
+class Userserializer(serializers.ModelSerializer):
+
+  class Meta:
+    model=User
+    fields=['id','username']
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
 
@@ -33,4 +40,44 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 )
 
     return user
+
+
+class ProfileAvatarSerializer(serializers.ModelSerializer):
+
+  user=Userserializer(read_only=True)
+  class Meta:
+    model=ProfileAvatar
+    fields=['user','profile_avatar']
   
+  def update(self, instance, validated_data):
+    instance.profile_avatar=validated_data.get('profile_avatar',instance.profile_avatar)
+    instance.save()
+    return instance
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+
+  user=Userserializer(read_only=True)
+  profile_url=serializers.SerializerMethodField(read_only=True)
+  
+  class Meta:
+    model=ProfileModel
+    fields=['user','bio','profile_url']
+
+  def get_profile_url(self,obj):
+    request=self.context.get('request')
+
+    if request is None:
+      return None
+    avatar,create=ProfileAvatar.objects.get_or_create(user=obj.user)
+
+    if avatar.profile_avatar:
+      return avatar.profile_avatar
+    else:
+      return None
+   
+
+  def update(self, instance, validated_data):
+    instance.bio = validated_data.get('bio', instance.bio)
+    instance.save()
+    return instance

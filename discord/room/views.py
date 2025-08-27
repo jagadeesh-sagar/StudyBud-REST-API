@@ -76,3 +76,4 @@ class TopicsAPIView(generics.ListAPIView):
   serializer_class=serializers.TopicsSerializers
 
 topics_list_view=TopicsAPIView.as_view()
+

@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 import os
 from pathlib import Path
 import datetime
+from decouple import config
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +22,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-s#%jr!$ty*qmy)r6_96gb_0c#)qsm#zhx3eg6tn+kg35lem2-*'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -76,7 +77,7 @@ if DEBUG:
   CORS_ALLOWED_ORIGINS +=[
     "http://localhost:5173", # not for production
     "http://localhost:8111", # only allow ssl
-          "http://127.0.0.1:5173", 
+    "http://127.0.0.1:5173", 
   ]
 
 
@@ -168,3 +169,10 @@ SIMPLE_JWT={
   "ACCESS_TOKEN_LIFETIME":datetime.timedelta(minutes=15) ,
   "REFRESH_TOKEN_LIFETIME":datetime.timedelta(minutes=45)
 }
+
+DEBUG = config('DEBUG', default=False, cast=bool)
+
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME')
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
