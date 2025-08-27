@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config('SECRET_KEY')
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -67,7 +67,8 @@ MIDDLEWARE = [
 ROOT_URLCONF = 'discord.urls'
 CORS_ALLOW_CREDENTIALS = True
 # CORS_URLS_REGEX=r"^/(api|room)/.*" 
-CORS_URLS_REGEX=r"^/(api|room|api/register)/.*"
+# CORS_URLS_REGEX=r"^/(api|room|api/register)/.*"\
+CORS_URLS_REGEX=r"^/(api|room|api/register|api/profile|api/profile/avatar)/.*"
 CORS_ALLOWED_ORIGINS=[
     # "http://localhost:8111/",
     # "https://localhost:8111/",
@@ -182,5 +183,8 @@ AWS_ACCESS_KEY_ID = get_ssm_param('/StudyBud/aws_access_key')
 AWS_SECRET_ACCESS_KEY = get_ssm_param('/StudyBud/aws_secret_access_key')
 AWS_S3_REGION_NAME = get_ssm_param('/StudyBud/aws_s3_region_name')
 AWS_STORAGE_BUCKET_NAME = get_ssm_param('/StudyBud/s3_bucket_name')
+
+
+SECRET_KEY = get_ssm_param('StudyBud')
 
 
