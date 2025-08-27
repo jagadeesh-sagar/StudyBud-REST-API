@@ -69,20 +69,18 @@ CORS_ALLOW_CREDENTIALS = True
 # CORS_URLS_REGEX=r"^/(api|room)/.*" 
 # CORS_URLS_REGEX=r"^/(api|room|api/register)/.*"\
 # CORS_URLS_REGEX=r"^/(api|room|api/register|api/profile|api/profile/avatar)/.*"
-CORS_URLS_REGEX = r"^/(api|room)/.*$"
-CORS_ALLOWED_ORIGINS=[
-    # "http://localhost:8111/",
-    # "https://localhost:8111/",
-]
-
+CORS_URLS_REGEX = r"^/(api|room)/.*"
 
 if DEBUG:
-  CORS_ALLOWED_ORIGINS +=[
-    "http://localhost:5173", # not for production
-    "http://localhost:8111", # only allow ssl
-    "http://127.0.0.1:5173", 
-  ]
-
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost:5173",
+        "http://localhost:8111", 
+        "http://127.0.0.1:5173",
+    ]
+else:
+    CORS_ALLOWED_ORIGINS = [
+        # Add your production frontend URLs here
+    ]
 
 
 TEMPLATES = [
@@ -173,7 +171,7 @@ SIMPLE_JWT={
   "REFRESH_TOKEN_LIFETIME":datetime.timedelta(minutes=45)
 }
 
-DEBUG = config('DEBUG', default=False, cast=bool)
+
 
 ssm=boto3.client('ssm',region_name=os.getenv('AWS_REGION','ap-south-1'))
 
