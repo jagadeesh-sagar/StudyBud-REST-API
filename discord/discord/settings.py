@@ -26,7 +26,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 # In settings.py
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
@@ -80,6 +80,7 @@ if DEBUG:
 else:
     CORS_ALLOWED_ORIGINS = [
         # Add your production frontend URLs here
+           "http://localhost:5173",
     ]
 
 

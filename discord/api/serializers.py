@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 from django.contrib.auth.password_validation import validate_password
-from .models import ProfileModel,ProfileAvatar
+from .models import ProfileModel,ProfileAvatar,ProfileAvatarIcon
 
 
 class Userserializer(serializers.ModelSerializer):
@@ -38,7 +38,6 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     email=validated_data['email'],
     password=validated_data['password'],
 )
-
     return user
 
 
@@ -55,16 +54,31 @@ class ProfileAvatarSerializer(serializers.ModelSerializer):
     return instance
 
 
+class ProfileAvatarIconSerializer(serializers.ModelSerializer):
+
+  user=Userserializer(read_only=True)
+
+  class Meta:
+    model=ProfileAvatarIcon
+    fields=['user','profile_avatar_icon']
+
+  def update(self, instance, validated_data):
+    instance.profile_avatar_icon=validated_data.get('profile_avatar_icon',instance.profile_avatar_icon)
+    instance.save()
+    return instance
+  
+
 class ProfileSerializer(serializers.ModelSerializer):
 
   user=Userserializer(read_only=True)
-  profile_url=serializers.SerializerMethodField(read_only=True)
+  avatar_url=serializers.SerializerMethodField(read_only=True)
+  avatar_icon_url=serializers.SerializerMethodField(read_only=True)
   
   class Meta:
     model=ProfileModel
-    fields=['user','bio','profile_url']
+    fields=['user','bio','avatar_url','avatar_icon_url']
 
-  def get_profile_url(self,obj):
+  def get_avatar_url(self,obj):
     request=self.context.get('request')
 
     if request is None:
@@ -76,7 +90,18 @@ class ProfileSerializer(serializers.ModelSerializer):
     else:
       return None
    
+  def get_avatar_icon_url(self,obj):
+    request=self.context.get('request')
 
+    if request is None:
+      return None
+    avatar,create=ProfileAvatarIcon.objects.get_or_create(user=obj.user)
+
+    if avatar.profile_avatar_icon:
+      return avatar.profile_avatar_icon
+    else:
+      return None
+   
   def update(self, instance, validated_data):
     instance.bio = validated_data.get('bio', instance.bio)
     instance.save()

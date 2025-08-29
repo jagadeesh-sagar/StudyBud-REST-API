@@ -1,4 +1,5 @@
 import boto3
+import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.conf import settings
@@ -7,8 +8,19 @@ from .serializers import UserRegistrationSerializer
 from rest_framework import generics,status
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import ProfileModel,ProfileAvatar
-from .serializers import ProfileSerializer,ProfileAvatarSerializer
+from .models import ProfileModel,ProfileAvatar,ProfileAvatarIcon
+from .serializers import ProfileSerializer,ProfileAvatarSerializer,ProfileAvatarIconSerializer
+
+
+lambda_client=boto3.client('lambda',region_name=settings.AWS_S3_REGION_NAME)
+
+def trigger_lambda(event_data):
+  response=lambda_client.invoke(
+    FunctionName='Demo-studybud-drf',
+    InvocationType='Event',
+    Payload=json.dumps(event_data)
+  )
+  return response
 
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -59,16 +71,21 @@ class ProfileAvatarview(APIView):
     )
     url=f'https://{settings.AWS_STORAGE_BUCKET_NAME}.s3.{settings.AWS_S3_REGION_NAME}.amazonaws.com/{user}/{file_name}'
     
-    return Response({'upload_url':presigned_urls ,'file_url':url})
+    return Response({'upload_url':presigned_urls ,'file_url':url,'bucket':settings.AWS_STORAGE_BUCKET_NAME,'key':f'{user}/{file_name}'})
   
   def put(self,request):
     
     user=request.user
+    data=request.data
+    bucket=data.pop('bucket')
+    key=data.pop('key')
+    data2={'url':data.get('profile_avatar'),'bucket':bucket,'key':key,'user':user.id}
     avatar,created=ProfileAvatar.objects.get_or_create(user=user)
     serializer=ProfileAvatarSerializer(avatar,data=request.data)
 
     if serializer.is_valid():
       serializer.save()
+      trigger_lambda(data2)
       return Response(serializer.data,status=status.HTTP_200_OK)
     return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
 
@@ -117,3 +134,26 @@ class Profile(APIView):
       return Response(serialilzer.data,status=status.HTTP_200_OK)
     return Response(serialilzer.errors,status=status.HTTP_400_BAD_REQUEST)
   
+
+class ProfileAvatarIconview(APIView):
+  permission_classes=[AllowAny]
+
+  def put(self,request):
+    user=self.request.data.get('user')
+    # print(self.request.data)
+    # data=self.request.data.pop('user')
+    # print(data)
+    
+    # print(user)
+    # print(user)
+    avatar,created=ProfileAvatarIcon.objects.get_or_create(user=user)
+    print(avatar)
+    serializer=ProfileAvatarIconSerializer(avatar,data=request.data,context={'request':request})
+    if serializer.is_valid():
+      serializer.save()
+
+      return Response(serializer.data,status=status.HTTP_200_OK)
+    return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+    
+
+    
