@@ -83,6 +83,11 @@ else:
            "http://localhost:5173",
     ]
 
+SESSION_COOKIE_SECURE = True  # NO USE AS IAM NOT USING SESSIONS IN MY PROJECT
+CSRF_COOKIE_SECURE = False  # FOR PROD FOR HTTPS MAKE IT TRUE
+SESSION_COOKIE_HTTPONLY = True  # TRUE MEANS REACT CAN NOT READ COOKIE
+CSRF_COOKIE_HTTPONLY = False  # AS I AM USING CSRF TOKEN IN REFERSH COOKIE,TRUE MEANS REACT CAN NOT READ COOKIE
+
 
 TEMPLATES = [
     {
@@ -183,6 +188,7 @@ AWS_ACCESS_KEY_ID = get_ssm_param('/StudyBud/aws_access_key')
 AWS_SECRET_ACCESS_KEY = get_ssm_param('/StudyBud/aws_secret_access_key')
 AWS_S3_REGION_NAME = get_ssm_param('/StudyBud/aws_s3_region_name')
 AWS_STORAGE_BUCKET_NAME = get_ssm_param('/StudyBud/s3_bucket_name')
+AWS_SNS_ARN = get_ssm_param('/StudyBud/sns_arn')
 
 
 SECRET_KEY = get_ssm_param('StudyBud')

@@ -10,9 +10,25 @@ from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from .models import ProfileModel,ProfileAvatar,ProfileAvatarIcon
 from .serializers import ProfileSerializer,ProfileAvatarSerializer,ProfileAvatarIconSerializer
+from datetime import timedelta
+from rest_framework_simplejwt.serializers import TokenRefreshSerializer
+from rest_framework_simplejwt.views import TokenRefreshView   #come here again
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.utils.decorators import method_decorator
 
 
 lambda_client=boto3.client('lambda',region_name=settings.AWS_S3_REGION_NAME)
+sns_client=boto3.client('sns',region_name=settings.AWS_S3_REGION_NAME)
+SNS_TOPIC_ARN=settings.AWS_SNS_ARN
+
+
+def sns_publish(user):{
+  sns_client.publish(
+    TopicArn=SNS_TOPIC_ARN,
+    Message=f'$Mr.{user.username} nice to see u here',
+    Subject="New Profile"
+  )
+}
 
 def trigger_lambda(event_data):
   response=lambda_client.invoke(
@@ -31,22 +47,62 @@ class UserRegistrationView(generics.CreateAPIView):
 
  # modifying the response so use create()
   def create(self, request, *args, **kwargs): 
+  
     serializer=self.get_serializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     user=serializer.save()
-
     refresh=RefreshToken.for_user(user)
+    sns_publish(user)
 
-    return Response({
+    response= Response({
       'user':{
         'id':user.id,
         'username':user.username,
         'email':user.email,
       },
-      'refresh':str(refresh),
-      'access':str(refresh.access_token)
+  
     },
     status=status.HTTP_201_CREATED)
+
+
+    cookie_max_age=7*24*60*60 #seconds 7 days in seconds
+    response.set_cookie(
+      key='refresh_token',
+      value=str(refresh),
+      httponly=True,
+      secure=False,  #set to True only in prod
+      samesite='Strict',
+      max_age=cookie_max_age,
+      expires=now()+timedelta(seconds=cookie_max_age)
+
+  )
+    response.set_cookie(
+            'access',
+            str(refresh.access_token),
+            httponly=True,
+            secure=False,  # Set to True in production
+            samesite='Strict'
+        )
+    return response
+
+class CookieTokenRefreshView(TokenRefreshView):
+  serializer_class=TokenRefreshSerializer
+
+  def post(self,request,*args,**kwargs):
+    refresh_token=self.request.COOKIES.get('refresh')
+    if refresh_token is None:
+      return Response({'error':'Refresh token is missing'},status=400)
+    
+    serializer=self.get_serializer(data={'refersh':refresh_token})
+    serializer.is_valid(raise_exception=True)
+    return Response({'access':serializer.validated_data['access']})
+
+
+@method_decorator(ensure_csrf_cookie,name='dispatch')
+class CSRFTokenView(APIView):
+  
+  def get(self,request,format=None):
+    return Response({'csrfToken':request.Meta.get('CSRF_COOKIE')})
 
 
 class ProfileAvatarview(APIView):
@@ -140,14 +196,8 @@ class ProfileAvatarIconview(APIView):
 
   def put(self,request):
     user=self.request.data.get('user')
-    # print(self.request.data)
-    # data=self.request.data.pop('user')
-    # print(data)
-    
-    # print(user)
-    # print(user)
     avatar,created=ProfileAvatarIcon.objects.get_or_create(user=user)
-    print(avatar)
+ 
     serializer=ProfileAvatarIconSerializer(avatar,data=request.data,context={'request':request})
     if serializer.is_valid():
       serializer.save()
